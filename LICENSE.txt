@@ -1,0 +1,2 @@
+This project is currently not publicly available. We allow reading and personal tinkering with the source.
+For any usecase that is not strictly private and non-commercial, please contact Faas.Mitchell@gmail.com

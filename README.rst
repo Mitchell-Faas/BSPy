@@ -2,7 +2,7 @@ BSPy
 ====
 
 This project attempts to make the Bulk-Synchronous parallel (BSP) model
-available in Python. This model, first described by Leslie G. Valiant[1]
+available in Python. This model, first described by Leslie G. Valiant
 is designed to be an efficient model for parallel computation while also
 promising to keep complexity analysis relatively simple.
 
