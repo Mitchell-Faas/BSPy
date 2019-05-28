@@ -1,7 +1,7 @@
 BSPy
 ====
 
-This project is attempts to make the Bulk-Synchronous parallel (BSP) model
+This project attempts to make the Bulk-Synchronous parallel (BSP) model
 available in Python. This model, first described by Leslie G. Valiant[1]
 is designed to be an efficient model for parallel computation while also
 promising to keep complexity analysis relatively simple.
@@ -9,7 +9,7 @@ promising to keep complexity analysis relatively simple.
 How to use BSPy
 +++++++++++++++
 
-**Documentation -** <url>
+**Documentation -** http://mitchellfaas.com/BSPy/index.html
 
 BSPy has digressed from the original standard to accommodate a more pythonic
 way of programming. Everyone is therefore urged to peruse the documentation.
