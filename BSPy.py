@@ -5,7 +5,30 @@ import itertools
 import time
 
 class BSPObject:
-    # The main BSP class
+    """The main BSP object that enables use of BSP
+
+    This class keeps track of communication lines, its pid and the total cores
+    it also enables the use of BSP functions through these variables. This is
+    a low level object which the end user should not need to call directly.
+
+    Parameters
+    ----------
+    cores : int
+        The total number of cores in this BSP instance (run).
+    pid : int
+        This processor's id. It always holds that 0 <= pid < cores
+    pipe_dict : dict of Pipeconnection
+        A connection to every other processor. Should be given
+        through the run() function.
+    barrier : barrier
+        The barrier object all processors adhere to
+
+    Attributes
+    ----------
+    cores : int
+        The total number of cores in this BSP instance (run).
+    pid : int
+        This processor's id. It always holds that 0 <= pid < cores"""
 
     def __init__(self, cores, pid, pipe_dict, barrier):
         # These should be static
@@ -20,11 +43,29 @@ class BSPObject:
         self._queue = deque()
 
     def _clear_to_send(self):
+        """Clears the _to_send dictionary.
+
+        Should not be used by the end user in normal operation.
+
+        Returns
+        -------
+        None"""
         self._to_send_dict = {}
 
     def _is_empty(self, comm_line):
-        """Returns true if comm_line is empty.
-        :comm_line: Pipe or Queue"""
+        """
+        Tells you if the comm_line is empty
+
+        Parameters
+        ----------
+        comm_line : Pipe or Queue
+            The communication line you're asking about.
+
+        Returns
+        -------
+        bool
+            True if comm_line is empty, False otherwise.
+        """
         if type(comm_line) == mp.connection.PipeConnection:
             empty = not comm_line.poll()
         elif type(comm_line) == mp.queues.Queue:
@@ -37,12 +78,17 @@ class BSPObject:
     def sync(self):
         """sync()
 
-            Ensures all threads have stopped and parse
-            all communication
+        Starts the synchronisation defined in the BSP model. A synchronisation
+        consists of 3 distinct steps:
+        1) Wait for all processing nodes to finish computing
+        2) Send all messages that have queued up since the last sync
+        3) Receive all messages that have been sent in the previous step.
+        After sync() has completed, every processor will have access to the data that
+        has been sent to it.
 
-            Returns
-            ----------
-            out : None"""
+        Returns
+        -------
+        None"""
 
         # Ensure every processor is done doing what it was doing before
         self._barrier.wait()
@@ -65,7 +111,6 @@ class BSPObject:
                     comm_line.put(message)
                 else:
                     raise TypeError("comm_line is neither a queue, nor a pipe")
-
 
         # Clear _to_send_dict
         self._clear_to_send()
@@ -101,22 +146,19 @@ class BSPObject:
         # Everyone is released and the _barrier reset.
 
     def send(self, message, send_pid):
-        """send(message, pid)
+        """
+        Sends a message to the processor with a pid of send_pid.
 
-            Sends any object to the processor with a pid of send_pid.
+        Parameters
+        ----------
+        message : literally anything
+            Whatever data you wish to transfer between processors
+        send_pid : int
+            The processor id to which you wish to send a message.
 
-            Parameters
-            ----------
-            message : literally anything
-              Whatever data you wish to transfer
-              between processors
-            send_pid : int
-              The processor id to which you wish
-              to send a message.
-
-            Returns
-            ----------
-            out : None"""
+        Returns
+        -------
+        None"""
 
         # Add message to _queue
         if send_pid not in self._to_send_dict:
@@ -124,14 +166,17 @@ class BSPObject:
         self._to_send_dict[send_pid].append(message)
 
     def move(self):
-        """"move()
+        """"
+        Acquires the first message stored in the receiving queue.
 
-        Acquires the first message stored in the receiving queue
+        Used to grab data from the receiving queue. This is a pop-like function
+        and previously returned data cannot be returned a second time.
+        returns None if queue is empty.
 
         Returns
-        ----------
+        -------
         out : queue data
-          The first element in the processor's "receive" queue."""
+            The first element in the processor's "receive" queue."""
         if len(self._queue) > 0:
             message = self._queue.popleft()
         else:
@@ -140,14 +185,12 @@ class BSPObject:
 
     @staticmethod
     def time():
-        """time()
-
-        Records the current Unix time in seconds of the system as a float.
+        """Records the current Unix time in seconds of the system as a float.
 
         Returns
-        ----------
-        out : float
-          Current Unix time in seconds"""
+        -------
+        float
+            Current Unix time in seconds"""
 
         if version_info >= (3, 7):
             return time.time_ns() / (10 ** 9) # Convert to floating-point seconds
@@ -155,19 +198,31 @@ class BSPObject:
             return time.time()
 
     def nprocs(self):
-        """nprocs()
+        """Finds number of available processors in BSP instance.
 
-            Finds number of available processors.
-
-            Returns
-            ----------
-            out : int
-              Number of processors participating
-                in the current BSP instance."""
+        Returns
+        -------
+        int
+            Number of processors participating in the current BSP instance."""
         return self.cores
 
 
 def _create_pipes(cores):
+    """Creates all communication pipes between processors.
+
+    Sets up pipes and queues for all processors by using a dict of dicts.
+    Part of this dict of dicts will be sent to every processor for communication
+    when the run() function is called.
+
+    Parameters
+    ----------
+    cores : int
+        The total number of cores you'll be running your BSP instance with.
+
+    Returns
+    -------
+    dict of dicts
+        A dictionary that connects each processor together."""
     # Create all combinations of channels
     channels = itertools.combinations(range(cores), 2)
 
@@ -195,24 +250,24 @@ def _create_pipes(cores):
 
 
 def run(function, cores=0, *args):
-    """run(function, [cores], [*args])
+    """Execute function on number of cores specified.
 
-        Execute function on number of cores specified.
-        Needs to be nested in an if __name__ = '__main__' statement.
+    This is how a BSP program is launched. Function needs to be of the form func(BSP:BSPObject).
+    run() needs to be nested in an if __name__ = '__main__' statement.
 
-        Parameters
-        ----------
-        function : callable
-          A callable function to run in BSP.
-        cores : int, optional
-          The amount of cores you wish to use
-          Defaults to all available cores
-        *args : optional
-          Any arguments you wish to pass on to your function.
+    Parameters
+    ----------
+    function : callable
+        A callable function to run in BSP.
+    cores : int, optional
+        The amount of cores you wish to use
+        Defaults to all available cores
+    *args : optional
+        Any arguments you wish to pass on to your function.
 
-        Returns
-        ----------
-        out : None"""
+    Returns
+    -------
+    None"""
     try:
         # If cores isn't given or is 0, then set to maximum
         if not cores:
@@ -257,12 +312,10 @@ def run(function, cores=0, *args):
 
 
 def max_cores():
-    """max_cores()
+    """Finds number of available processors of the system.
 
-        Finds number of available processors.
-
-        Returns
-        ----------
-        out : int
-          Maximum number of available processors."""
+    Returns
+    ----------
+    int
+        Maximum number of available processors."""
     return mp.cpu_count()
