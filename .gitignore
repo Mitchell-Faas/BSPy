@@ -1,2 +1,4 @@
 BenchmarkTestRun.txt
 .idea
+__pycache__
+docs
