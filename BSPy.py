@@ -14,14 +14,14 @@ class BSPObject:
     Parameters
     ----------
     cores : int
-        The total number of cores in this BSP instance (run).
+        The total number of cores in this BSP instance.
     pid : int
-        This processor's id. It always holds that 0 <= pid < cores
+        This processor's id. It always holds that 0 <= pid < cores.
     pipe_dict : dict of Pipeconnection
         A connection to every other processor. Should be given
         through the run() function.
     barrier : barrier
-        The barrier object all processors adhere to
+        The barrier object all processors adhere to.
 
     Attributes
     ----------
@@ -49,7 +49,7 @@ class BSPObject:
 
         Returns
         -------
-        None"""
+        out : None"""
         self._to_send_dict = {}
 
     def _is_empty(self, comm_line):
@@ -63,7 +63,7 @@ class BSPObject:
 
         Returns
         -------
-        bool
+        out : bool
             True if comm_line is empty, False otherwise.
         """
         if type(comm_line) == mp.connection.PipeConnection:
@@ -88,7 +88,7 @@ class BSPObject:
 
         Returns
         -------
-        None"""
+        out : None"""
 
         # Ensure every processor is done doing what it was doing before
         self._barrier.wait()
@@ -158,7 +158,7 @@ class BSPObject:
 
         Returns
         -------
-        None"""
+        out : None"""
 
         # Add message to _queue
         if send_pid not in self._to_send_dict:
@@ -166,7 +166,7 @@ class BSPObject:
         self._to_send_dict[send_pid].append(message)
 
     def move(self):
-        """"
+        """
         Acquires the first message stored in the receiving queue.
 
         Used to grab data from the receiving queue. This is a pop-like function
@@ -189,7 +189,7 @@ class BSPObject:
 
         Returns
         -------
-        float
+        out : float
             Current Unix time in seconds"""
 
         if version_info >= (3, 7):
@@ -202,7 +202,7 @@ class BSPObject:
 
         Returns
         -------
-        int
+        out : int
             Number of processors participating in the current BSP instance."""
         return self.cores
 
@@ -221,7 +221,7 @@ def _create_pipes(cores):
 
     Returns
     -------
-    dict of dicts
+    out : dict of dicts
         A dictionary that connects each processor together."""
     # Create all combinations of channels
     channels = itertools.combinations(range(cores), 2)
@@ -267,7 +267,7 @@ def run(function, cores=0, *args):
 
     Returns
     -------
-    None"""
+    out : None"""
     try:
         # If cores isn't given or is 0, then set to maximum
         if not cores:
@@ -303,7 +303,7 @@ def run(function, cores=0, *args):
         current process has finished its bootstrapping phase.
         
         This probably means that you tried to use the run function
-        but have forgotten to use the proper safequard:
+        but have forgotten to use the proper safeguard:
         
             if __name__ == '__main__':
                 run(function, cores)
@@ -316,6 +316,6 @@ def max_cores():
 
     Returns
     ----------
-    int
+    out : int
         Maximum number of available processors."""
     return mp.cpu_count()
