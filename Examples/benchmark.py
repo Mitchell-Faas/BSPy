@@ -1,3 +1,6 @@
+# This file is a direct port from Rob H. Bisseling's benchmarking algorithm
+# found in BSPedupack: http://www.staff.science.uu.nl/~bisse101/Software/software.html
+
 import BSPy
 import sys
 
