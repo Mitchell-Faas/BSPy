@@ -145,15 +145,15 @@ class BSPObject:
         self._barrier.wait()
         # Everyone is released and the _barrier reset.
 
-    def send(self, message, send_pid):
+    def send(self, message, pid):
         """
-        Sends a message to the processor with a pid of send_pid.
+        Sends a message to the processor identified with pid.
 
         Parameters
         ----------
         message : literally anything
             Whatever data you wish to transfer between processors
-        send_pid : int
+        pid : int
             The processor id to which you wish to send a message.
 
         Returns
@@ -161,9 +161,9 @@ class BSPObject:
         out : None"""
 
         # Add message to _queue
-        if send_pid not in self._to_send_dict:
-            self._to_send_dict[send_pid] = deque()
-        self._to_send_dict[send_pid].append(message)
+        if pid not in self._to_send_dict:
+            self._to_send_dict[pid] = deque()
+        self._to_send_dict[pid].append(message)
 
     def move(self):
         """
