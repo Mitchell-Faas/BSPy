@@ -4,7 +4,6 @@ N = 10
 max_number = 10**2
 counter = 0
 
-
 def NQueens(BSP):
     def isSafe(N, board, row, col):
         # Check this row on the left side
@@ -91,22 +90,6 @@ def NQueens(BSP):
     if s ==0:
         print("we found {} solutions in {} seconds.".format(total, toc - tic))
 
-
-def func(bsp: BSPy.BSPObject):
-    p = bsp.cores
-    s = bsp.pid
-
-    otherProc = (s + 1) % p
-
-    num = otherProc
-
-    bsp.send("Hello from proc {} to proc {}".format(s, num), otherProc)
-
-    bsp.sync()
-
-    str = bsp.move()
-
-    print(str)
 
 if __name__ == '__main__':
     BSPy.run(NQueens, 4)
