@@ -14,7 +14,7 @@ Those already familiar with BSP will likely only need to read up on the
 available functions and their syntax. For everyone else, a tutorial section
 is available.
 
-##Further Reading
+##Further Reading  
 **Original paper -** https://dl.acm.org/citation.cfm?id=79173.79181  
 **bsp-worldwide -** http://www.bsp-worldwide.org/  
 **Zefiros BSPLib (C++) -** http://bsplib.eu/  
