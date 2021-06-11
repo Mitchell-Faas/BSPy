@@ -3,7 +3,7 @@ import setuptools
 setuptools.setup(
      name='BSPython',
      py_modules=['bspy'],
-     version='1.0',
+     version='1.0.1',
      license='MIT',
      author="Mitchell Faas",
      author_email="Faas.Mitchell@gmail.com",

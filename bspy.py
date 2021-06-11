@@ -3,6 +3,12 @@ import multiprocessing as mp
 from sys import version_info
 import itertools
 import time
+import os
+
+RUNNING_ON_WINDOWS = os.name == 'nt'
+
+if not RUNNING_ON_WINDOWS:
+    mp.set_start_method("fork")
 
 
 class BSPObject:
@@ -32,6 +38,10 @@ class BSPObject:
         This processor's id. It always holds that 0 <= pid < cores"""
 
     def __init__(self, cores, pid, pipe_dict, barrier):
+        # Constants
+        self.PIPE_TYPE = mp.connection.PipeConnection if RUNNING_ON_WINDOWS else mp.connection.Connection
+        self.QUEUE_TYPE = mp.queues.Queue
+
         # These should be static
         self._pipe_dict = pipe_dict
         self._barrier = barrier
@@ -67,9 +77,9 @@ class BSPObject:
         out : bool
             True if comm_line is empty, False otherwise.
         """
-        if type(comm_line) == mp.connection.PipeConnection:
+        if type(comm_line) == self.PIPE_TYPE:
             empty = not comm_line.poll()
-        elif type(comm_line) == mp.queues.Queue:
+        elif type(comm_line) == self.QUEUE_TYPE:
             empty = comm_line.empty()
         else:
             raise TypeError("comm_line is neither a queue, nor a pipe")
@@ -104,10 +114,10 @@ class BSPObject:
             while send_queue:
                 # Pop the first message in send_queue, and send it.
                 message = send_queue.popleft()
-                if type(comm_line) == mp.connection.PipeConnection:
+                if type(comm_line) == self.PIPE_TYPE:
                     # comm_line is a Pipe object
                     comm_line.send(message)
-                elif type(comm_line) == mp.queues.Queue:
+                elif type(comm_line) == self.QUEUE_TYPE:
                     # comm_line is a Queue object, so use put
                     comm_line.put(message)
                 else:
@@ -127,10 +137,10 @@ class BSPObject:
             comm_line = self._pipe_dict[key]
 
             while not self._is_empty(comm_line):
-                if type(comm_line) == mp.connection.PipeConnection:
+                if type(comm_line) == self.PIPE_TYPE:
                     # comm_line is a Pipe object
                     message = comm_line.recv()
-                elif type(comm_line) == mp.queues.Queue:
+                elif type(comm_line) == self.QUEUE_TYPE:
                     # comm_line is a Queue object, so use get
 
                     # Nothing can change in the size of the comm_line queue now;
